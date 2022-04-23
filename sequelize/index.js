@@ -1,32 +1,26 @@
-import { Sequelize } from 'sequelize';
-import models from './models/index.ts';
-import dotenv from 'dotenv';
-import path from 'path';
+const { Sequelize } = require('sequelize');
 
-const __dirname = path.resolve();
+// Import models to sync.
+const models = require('./models/index.ts');
+const dotenv = require('dotenv');
+const path = require('path');
 
-// Get env vars from dotenv 
-dotenv.config({ path: __dirname + '/.env' });
-
+// Get env vars from dotenv
+dotenv.config({ path: __dirname + '/../.env' });
 // Define Sequelize instance.
 const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USERNAME, process.env.DB_PASSWORD, {
 	host: process.env.DB_HOST,
 	dialect: 'mysql'
 });
 
-
 sequelize.authenticate()
-.then( () => {
+.then( async () => {
 	console.log('Connection to the database has been established successfully.');
 
-	models.forEach( model => {
-		try{
-			model(sequelize);
-		} catch (error) {
-			console.log('Error code: ', error);
-			process.exit(1);
-		}
-	});
+	models.default(sequelize);
+	await sequelize.sync();
+
+	console.log("All models were synchronized successfully.");
 	console.log('Models mapped to sequelize instance');
 },
 error => {
@@ -35,4 +29,5 @@ error => {
 	process.exit(1);
 });
 
-export default sequelize;
+// Export sequelize instance
+module.exports = sequelize;

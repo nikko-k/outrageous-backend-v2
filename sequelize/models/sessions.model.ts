@@ -1,7 +1,7 @@
 import { DataTypes, Sequelize } from "sequelize";
 
 export default (sequelize:Sequelize) => {
-    sequelize.define('user',
+    sequelize.define('session',
         {
             id: {
                 allowNull: false,
@@ -9,24 +9,19 @@ export default (sequelize:Sequelize) => {
                 type: DataTypes.UUID,
                 defaultValue: DataTypes.UUIDV4,
             },
-            email: {
-                allowNull: false,
-                type: DataTypes.STRING,
-                unique:true,
-            },
-            password: {
-                type: DataTypes.STRING,
-            },
-            firstname: {
+            userID: {
                 allowNull: false,
                 type: DataTypes.STRING
             },
-            lastname: {
-                type: DataTypes.STRING
+            createdAt: {
+                allowNull:false,
+                type: DataTypes.DATE,
             },
-            facebookID: {
-                type: DataTypes.STRING,
+            validForDays: {
+                type: DataTypes.INTEGER,
+                defaultValue: 30,
             }
         });
+
     return sequelize;
 }

@@ -1,4 +1,5 @@
-export default interface Database {
-    registerUser(email:string,hashedPass:string):boolean;
-    loginUser(email:string,hashedPass:string):string;
+export default interface IDatabase {
+    registerUser(email:string, firstName:string ,hashedPass:string):Promise<any>;
+    getUser(email:string):object;
+    getUserbyID(id:string):object;
   }
