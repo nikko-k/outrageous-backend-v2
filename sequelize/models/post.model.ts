@@ -1,7 +1,7 @@
 import { DataTypes, Sequelize } from "sequelize";
 
 export default (sequelize:Sequelize) => {
-    sequelize.define('session',
+    sequelize.define('post',
         {
             id: {
                 allowNull: false,

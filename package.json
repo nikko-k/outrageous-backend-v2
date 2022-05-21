@@ -4,11 +4,13 @@
   "description": "",
   "main": "index.js",
   "compilerOptions": {
-    "module": "CommonJS",
-    "target": "es6"
+    "module": "commonjs",
+    "target": "es6",
+	"esModuleInterop": true
   },
   "scripts": {
     "start": "nodemon index.ts",
+    "sync": "node ./sequelize/sync.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Outrageous",

@@ -99,33 +99,23 @@ app.post('/register',body('password').isLength({min:5,max:30}),body('firstname')
 		res.send(validationErrors)
 		return;
 	}
-	const result = db.registerUser(user.email,user.firstname, user.password);
 
-	result
-	.then((value) => {
-		const newRecord:boolean = value[0]._options.isNewRecord;
-		if(newRecord){
-			console.log('User Created successfully');
-			res.sendStatus(200);
-		} else {
-			console.log('User already exists');
-			res.send(401)
-		}
+	db.registerUser(user.email,user.firstname, user.password)
+	.then(value => {
+		res.send(JWT.sign( value, JWTSecret));
 	})
-	.catch((error) => {
-		console.log('Failed');
-		console.log(error)
-		res.sendStatus(401);
+	.catch(error => {
+		res.status(401);
+		res.send(error.message);
 	});
+
+	// result
 });
 
 app.post( '/login',
 	passport.authenticate( 'local', { session: false, failureMessage: true } ),
 	function(req:any,res) {
-		res.json({
-			token: JWT.sign( req.user.dataValues.id, JWTSecret),
-			user: req.user.dataValues,
-		} );
+		res.send(JWT.sign( req.user.dataValues.id, JWTSecret));
 	}
 );
 
@@ -154,24 +144,20 @@ app.post('/auth/check', (req:any,res) => {
 	}
 })
 
-// app.post('/auth/check', (req:any,res) => {
-// 	db.getUser(req.user)
-// 	.then( value => {
-// 		if( ! value || Object.keys(value).length <= 0 ) {
-// 			res.sendStatus(401)
-// 		} else {
-// 			res.sendStatus(200);
-// 		}
-// 	})
-// 	.catch( (error) => {
-// 		res.sendStatus(401);
-// 	})
-// })
+app.get('/garage', (req,res) => {
+	const garageID = req.query.garageid;
 
-app.post( '/auth/checktoken', (req,res) => {
-	const result = JWT.verify( req.body.token, JWTSecret )
-	console.log(result);
-	
+	database.getGaragebyID(garageID)
+	.then( value => {
+		if( ! value ) {
+			res.sendStatus(404);
+		} else {
+			res.send(value);
+		}
+	})
+	.catch( error => {
+		res.send(error);
+	});
 });
 
 app.listen(PORT , () => {

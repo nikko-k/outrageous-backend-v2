@@ -21,6 +21,10 @@ export default (sequelize:Sequelize) => {
                 allowNull: false,
                 type: DataTypes.STRING
             },
+			garageID: {
+				allowNull: true,
+				type: DataTypes.STRING,
+			},
             lastname: {
                 type: DataTypes.STRING
             },
