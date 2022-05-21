@@ -14,6 +14,7 @@ import cors	from 'cors';
 import LocalStrategy from './passport-strategies/local';
 import JWTStrategy from './passport-strategies/jwt';
 import { userInfo } from 'os';
+import { json } from 'stream/consumers';
 
 // Database
 const database = new Database;
@@ -136,33 +137,42 @@ app.post(
 	}
 )
 
-app.get('/auth/check', (req:any,res) => {
-	db.getUser(req.user)
-	.then( value => {
-		if( ! value || Object.keys(value).length <= 0 ) {
-			res.sendStatus(401)
-		} else {
-			res.sendStatus(200);
-		}
-	})
-	.catch( (error) => {
+app.post('/auth/check', (req:any,res) => {
+	const token = req.body.token;
+	if( ! token ) {
 		res.sendStatus(401);
-	})
+	}
+
+	try {
+		const content = JWT.verify(token, JWTSecret);
+
+		if( content ) {
+			res.send(content);
+		}
+	} catch( error ) {
+		res.sendStatus(401);
+	}
 })
 
-app.post('/auth/check', (req:any,res) => {
-	db.getUser(req.user)
-	.then( value => {
-		if( ! value || Object.keys(value).length <= 0 ) {
-			res.sendStatus(401)
-		} else {
-			res.sendStatus(200);
-		}
-	})
-	.catch( (error) => {
-		res.sendStatus(401);
-	})
-})
+// app.post('/auth/check', (req:any,res) => {
+// 	db.getUser(req.user)
+// 	.then( value => {
+// 		if( ! value || Object.keys(value).length <= 0 ) {
+// 			res.sendStatus(401)
+// 		} else {
+// 			res.sendStatus(200);
+// 		}
+// 	})
+// 	.catch( (error) => {
+// 		res.sendStatus(401);
+// 	})
+// })
+
+app.post( '/auth/checktoken', (req,res) => {
+	const result = JWT.verify( req.body.token, JWTSecret )
+	console.log(result);
+	
+});
 
 app.listen(PORT , () => {
 	console.log(`listening on port ${PORT}`);
