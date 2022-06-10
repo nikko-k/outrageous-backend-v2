@@ -9,6 +9,10 @@ export default (sequelize:Sequelize) => {
                 type: DataTypes.UUID,
                 defaultValue: DataTypes.UUIDV4,
             },
+			year: {
+				allowNull: false,
+				type: DataTypes.INTEGER
+			},
             make: {
                 allowNull: false,
                 type: DataTypes.STRING

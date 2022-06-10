@@ -4,6 +4,8 @@ import errors from './errors';
 
 import { Sequelize } from "sequelize/types";
 import IDatabase from "./types/dbinterface";
+import { create } from 'domain';
+import { json } from 'stream/consumers';
 
 
 export default class Database implements IDatabase {
@@ -14,7 +16,7 @@ export default class Database implements IDatabase {
 		})
 
 		if( foundUser ) {
-			throw new errors.userexists;
+			throw new errors.userexists();
 		}
 
 		const user = await db.models.user.create({
@@ -49,7 +51,7 @@ export default class Database implements IDatabase {
 
 	}
 	getUserbyID = (id:string,fields?:string[]):Promise<any> => {
-		const attributes:string[] = fields || ['email', 'password']
+		const attributes:string[] = fields || ['id', 'email', 'password']
 
 		return db.models.user.findOne({
 			attributes: attributes,
@@ -59,13 +61,57 @@ export default class Database implements IDatabase {
 		})
 	}
 
+	getGarageByUser = (id):Promise<any> => {
+		if(!id) {
+			throw new errors.missingargument();
+		}
+
+		return db.models.garage.findOne({
+			where:{
+				userID: id
+			}
+		})
+	}
+
+	getCarByID = (id):Promise<any> => {
+		if(!id) {
+			throw new errors.missingargument();
+		}
+
+		return db.models.car.findOne({
+			where:{
+				id
+			}
+		})
+	}
+
 	getGaragebyID = (id):Promise<any> => {
 		// console.log(db.models.garage);
+		if(!id) {
+			throw new errors.missingargument();
+		}
+
 		return db.models.garage.findOne({
-			// attributes: ['id'],
 			where: {
 				id
 			}
 		})
+	}
+
+	createCar = async (car, userID):Promise<any> => {
+		// console.log(db.models.garage);
+		if(!car) {
+			throw new errors.missingargument();
+		}
+		const createdCarID = '';
+
+		const garage = await this.getGarageByUser(userID)
+		const newCar = await db.models.car.create({
+			year: car.year,
+			make: car.make,
+			model: car.model,
+		});
+
+		return createdCarID;
 	}
 }

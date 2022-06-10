@@ -12,9 +12,8 @@ opts.secretOrKey = process.env.JWT_SECRET;
 export default new Strategy(
 	opts,
 	function (jwtPayload, cb) {
-
 	//find the user in db if needed. This functionality may be omitted if you store everything you'll need in JWT payload.
-	return database.getUserbyID(jwtPayload.id)
+	return database.getUserbyID(jwtPayload)
 		.then(user => {
 			return cb(null, user);
 		})

@@ -9,6 +9,7 @@ import Database from './database';
 import session from 'express-session'
 import { errorMonitor } from 'events';
 import cors	from 'cors';
+import fileUpload from 'express-fileupload';
 
 // import localStrategy from './passport-strategies/local';
 import LocalStrategy from './passport-strategies/local';
@@ -78,6 +79,7 @@ app.use(function(req:any,res,next){
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+
 
 // Test endpoint
 app.get('/', (req,res) =>{
@@ -149,15 +151,60 @@ app.get('/garage', (req,res) => {
 
 	database.getGaragebyID(garageID)
 	.then( value => {
-		if( ! value ) {
+		if(! value) {
 			res.sendStatus(404);
 		} else {
 			res.send(value);
 		}
 	})
 	.catch( error => {
+		res.status(500)
 		res.send(error);
 	});
+});
+
+app.get('/mygarage', passport.authenticate('jwt') ,(req:any,res) => {
+	const userID = req.user.getDataValue('id');
+
+	if(!userID) {
+		res.send(401)
+	}
+
+	database.getGarageByUser(userID)
+	.then(value => {
+		res.send(value);
+	})
+	.catch(err => {
+		res.send(404);
+	})
+});
+
+app.get('/car',(req:any,res) => {
+	const carID = req.query.carid;
+
+	database.getCarByID(carID)
+})
+
+app.post('/addcarpic', (req:any,res) => {
+
+});
+
+app.post('/addcar', passport.authenticate('jwt'), (req:any,res) => {
+	const car = req.body;
+	const userID = req.user.getDataValue('id');
+	if(!car || !userID) {
+		res.send(403);
+	}
+
+	database.createCar(car,userID)
+	.then(value => {
+		console.log(value);
+		res.sendStatus(200);
+	})
+	.catch((error) =>{
+		console.log(error);
+		res.sendStatus(500);
+	})
 });
 
 app.listen(PORT , () => {

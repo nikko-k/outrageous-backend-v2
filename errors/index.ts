@@ -1,3 +1,4 @@
 import userexists from './userexists.error';
+import missingargument from './missingargument.error';
 
-export default {userexists};
+export default {userexists,missingargument};
