@@ -1,9 +1,9 @@
-const { Sequelize } = require('sequelize');
+import { Sequelize } from 'sequelize';
 
 // Import models to sync.
-const models = require('./models/index.ts');
-const dotenv = require('dotenv');
-const path = require('path');
+import models from './models/index.ts';
+import dotenv from 'dotenv';
+import path from 'path';
 
 // Get env vars from dotenv
 dotenv.config({ path: __dirname + '/../.env' });
@@ -17,13 +17,13 @@ sequelize.authenticate()
 .then( async () => {
 	console.log('Connection to the database has been established successfully.');
 
-	models.default(sequelize);
+	models(sequelize);
 	await sequelize.sync({force:true});
 
 	console.log("All models were synchronized successfully.");
 	console.log('Models mapped to sequelize instance');
 
-	process.exit(0);``
+	process.exit(0);
 },
 error => {
 	console.log('Failed to connect to DB');

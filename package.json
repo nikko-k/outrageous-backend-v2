@@ -9,8 +9,9 @@
     "esModuleInterop": true
   },
   "scripts": {
-    "start": "nodemon index.ts",
-    "sync": "node ./sequelize/sync.js",
+    "start:dev": "nodemon index.ts",
+    "start": "ts-node index.ts",
+    "sync": "ts-node ./sequelize/sync.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Outrageous",
