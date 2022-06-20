@@ -35,6 +35,16 @@ passport.serializeUser(function(user, done) {
 	done(null, user);
 });
 
+// Add error handler middleware
+// if (process.env.NODE_ENV === 'development') {
+// 	app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+//   }
+  
+//   if (process.env.NODE_ENV === 'production') {
+// 	app.use(express.errorHandler());
+//   }
+  
+
 passport.deserializeUser(function(email, done) {
 	db.getUser(email)
 	.then( (value) => {
@@ -209,4 +219,6 @@ app.post('/addcar', passport.authenticate('jwt'), (req:any,res) => {
 
 app.listen(PORT , () => {
 	console.log(`listening on port ${PORT}`);
+	console.log(process.env.NODE_ENV);
+	
 });

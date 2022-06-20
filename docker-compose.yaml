@@ -1,0 +1,35 @@
+version: "3.9"  # optional since v1.27.0
+services:
+  database:
+    image: mysql
+    volumes:
+      - ./db-data:/var/lib/mysql
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=kuku
+  api:
+    build:
+      context: ./
+      dockerfile: database.Dockerfile
+    depends_on:
+      - db
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=database
+      - DB_NAME=outrageous_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=kuku
+      - PORT=3000
+    restart: always
+    ports:
+      - 3030:3000
+  api-sync:
+    build:
+      context: ./
+      dockerfile: database-sync.Dockerfile
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=database
+      - DB_NAME=outrageous_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=kuku
