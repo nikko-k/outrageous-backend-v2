@@ -9,16 +9,14 @@ import Database from './database';
 import session from 'express-session'
 import { errorMonitor } from 'events';
 import cors	from 'cors';
-import fileUpload from 'express-fileupload';
 
-// import localStrategy from './passport-strategies/local';
 import LocalStrategy from './passport-strategies/local';
 import JWTStrategy from './passport-strategies/jwt';
 import { userInfo } from 'os';
 import { json } from 'stream/consumers';
 
 // Database
-const database = new Database;
+const database = new Database();
 
 // JWT Secret
 const JWTSecret = process.env.JWT_SECRET;
@@ -57,7 +55,7 @@ passport.deserializeUser(function(email, done) {
 });
 
 dotenv.config();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
 const db = new Database();
 
@@ -75,7 +73,7 @@ const corsOptions = {
 	exposedHeaders: ["set-cookie"],
   };
 
-app.use("/", cors(corsOptions));
+app.use(cors(corsOptions));
 
 app.use(session({secret: "secret"}));
 
@@ -219,6 +217,7 @@ app.post('/addcar', passport.authenticate('jwt'), (req:any,res) => {
 
 app.listen(PORT , () => {
 	console.log(`listening on port ${PORT}`);
-	console.log(process.env.NODE_ENV);
-	
+	console.log(`environment: ${process.env.NODE_ENV}`);
 });
+
+export default app;

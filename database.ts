@@ -6,6 +6,7 @@ import { Sequelize } from "sequelize/types";
 import IDatabase from "./types/dbinterface";
 import { create } from 'domain';
 import { json } from 'stream/consumers';
+import sequelize from 'sequelize';
 
 
 export default class Database implements IDatabase {
@@ -113,5 +114,20 @@ export default class Database implements IDatabase {
 		});
 
 		return createdCarID;
+	}
+
+	addFile = async (file):Promise<any> => {
+		return db.models.file.create({
+			originalname: file.name,
+			filename: file.newName,
+			filepath: file.path,
+			ispicture: file.isPicture,
+			owner: file.userID
+		})
+	}
+
+	getFile = (fileid):Promise<any> => {
+		return db.models.file.findByPk(fileid)
+
 	}
 }
