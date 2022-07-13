@@ -12,7 +12,7 @@ services:
       context: ./
       dockerfile: database.Dockerfile
     depends_on:
-      - db
+      - database
     environment:
       - NODE_ENV=development
       - DB_HOST=database
@@ -27,6 +27,8 @@ services:
     build:
       context: ./
       dockerfile: database-sync.Dockerfile
+    depends_on:
+      - database
     environment:
       - NODE_ENV=development
       - DB_HOST=database
