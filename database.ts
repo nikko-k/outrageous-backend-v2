@@ -116,7 +116,7 @@ export default class Database implements IDatabase {
 		return createdCarID;
 	}
 
-	addFile = async (file):Promise<any> => {
+	addFile = (file):Promise<any> => {
 		return db.models.file.create({
 			originalname: file.name,
 			filename: file.newName,

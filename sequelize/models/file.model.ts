@@ -28,7 +28,8 @@ export default (sequelize:Sequelize) => {
 			owner: {
 				allowNull: true,
 				defaultValue: null,
-				type: DataTypes.STRING			}
+				type: DataTypes.STRING
+			}
         });
 
     return sequelize;
