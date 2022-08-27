@@ -6,18 +6,25 @@ const database = new Database();
 
 export default new LocalStrategy({usernameField: 'email', passwordField:'password'},
 function(email, password, cb) {
+	if(! email) {
+		cb(null, false, {message:"No email provided!"} );
+	}
+
     database.getUser(email)
         .then(value => {
-            if( bcrypt.compareSync(password, value.dataValues.password) ) {
-                const user:any = value.dataValues.email;
-                cb(null,value);
-            } else {
-                cb(null, false, {message:"Incorrect user or password!"} );
-            }
+			if( value ) {
+				if( bcrypt.compareSync(password, value.dataValues.password) ) {
+					cb(null,value);
+				} else {
+					cb(null);
+				}
+			} else {
+				cb(null);
+			}
         })
         .catch(error => {
             console.log(error);
-            cb(null, false, {message:"Incorrect user or password!"} );
+            cb(null);
         });
     }
 );

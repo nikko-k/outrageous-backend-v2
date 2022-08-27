@@ -12,8 +12,12 @@ import cors	from 'cors';
 
 import LocalStrategy from './passport-strategies/local';
 import JWTStrategy from './passport-strategies/jwt';
+import FacebookStrategy from './passport-strategies/facebook';
+
 import { userInfo } from 'os';
 import { json } from 'stream/consumers';
+import Cars from './cars';
+import { send } from 'process';
 
 // Database
 const database = new Database();
@@ -28,6 +32,7 @@ const JWTSecret = process.env.JWT_SECRET;
 
 passport.use( 'local', LocalStrategy);
 passport.use( 'jwt', JWTStrategy);
+passport.use( 'facebook', FacebookStrategy);
 
 passport.serializeUser(function(user, done) {
 	done(null, user);
@@ -59,6 +64,8 @@ const PORT = process.env.PORT || 3000;
 
 const db = new Database();
 
+const cars = new Cars(process.env.CAR_API_KEY, process.env.CAR_API_HOST, process.env.CAR_API_URL );
+
 // Init express
 const app = express();
 
@@ -75,10 +82,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-app.use(session({secret: "secret"}));
-
 app.use(passport.initialize())
-app.use(passport.session())
 
 app.use(function(req:any,res,next){
 	res.locals.currentUser = req.user;
@@ -90,9 +94,36 @@ app.use(express.urlencoded({extended: true}));
 
 
 // Test endpoint
-app.get('/', (req,res) =>{
+app.get('/', (req,res) => {
 	res.send(`Serving on port ${PORT}`);
 } );
+
+app.get('/car/allmakes',passport.authenticate('jwt') ,(req,res) => {
+	cars.getCarMakes()
+		.then( value => {
+			res.send(value.data)
+		})
+		.catch( err => {
+			res.status(500);
+			res.send(err);
+		})
+})
+
+app.get( '/cars', passport.authenticate('jwt'), (req,res) => {
+	const year  = req.query.year || '';
+	const make  = req.query.make || '';
+	const model = req.query.model || '';
+
+	cars.getFilteredCars(year,make,model)
+		.then( value => {
+			res.send(value.data)
+		})
+		.catch( err => {
+			res.status(500);
+			res.send(err);
+		})
+	
+})
 
 // Register endpoint
 app.post('/register',body('password').isLength({min:5,max:30}),body('firstname').notEmpty(), body('email').isEmail() , (req,res) => {
@@ -111,15 +142,14 @@ app.post('/register',body('password').isLength({min:5,max:30}),body('firstname')
 	}
 
 	db.registerUser(user.email,user.firstname, user.password)
-	.then(value => {
-		res.send(JWT.sign( value, JWTSecret));
-	})
-	.catch(error => {
-		res.status(401);
-		res.send(error.message);
-	});
-
-	// result
+		.then(value => {
+			res.status(200);
+			res.send(JWT.sign( value, JWTSecret));
+		})
+		.catch(error => {
+			res.status(401);
+			res.send(error.message);
+		});
 });
 
 app.post( '/login',
@@ -136,6 +166,14 @@ app.post(
 		res.send(200);
 	}
 )
+
+app.get('/login/facebook', passport.authenticate('facebook', {
+	scope: [ 'email', 'user_location' ]
+}));
+
+app.get('auth/facebook/callback', passport.authenticate( 'facebook'), (req:any,res) => {
+	res.json(req.user);
+})
 
 app.post('/auth/check', (req:any,res) => {
 	const token = req.body.token;
@@ -158,17 +196,38 @@ app.get('/garage', (req,res) => {
 	const garageID = req.query.garageid;
 
 	database.getGaragebyID(garageID)
-	.then( value => {
-		if(! value) {
-			res.sendStatus(404);
-		} else {
-			res.send(value);
-		}
-	})
-	.catch( error => {
-		res.status(500)
-		res.send(error);
-	});
+		.then( value => {
+			if(! value) {
+				res.sendStatus(404);
+			} else {
+				res.send(value);
+			}
+		})
+		.catch( error => {
+			res.status(500)
+			res.send(error);
+		});
+});
+
+app.get('/user', passport.authenticate('jwt') , (req:any,res) => {
+	let userID:any = req.user.dataValues.id;
+
+	if(! userID) {
+		userID = req.user.dataValues.id;
+	}
+
+	database.getUserbyID(userID)
+		.then( value => {
+			if(! value) {
+				res.sendStatus(404);
+			} else {
+				res.send(value);
+			}
+		})
+		.catch( error => {
+			res.status(500)
+			res.send(error);
+		});
 });
 
 app.get('/mygarage', passport.authenticate('jwt') ,(req:any,res) => {
@@ -197,7 +256,7 @@ app.post('/addcarpic', (req:any,res) => {
 
 });
 
-app.post('/addcar', passport.authenticate('jwt'), (req:any,res) => {
+app.post('/create/car', passport.authenticate('jwt'), (req:any,res) => {
 	const car = req.body;
 	const userID = req.user.getDataValue('id');
 	if(!car || !userID) {
@@ -205,14 +264,14 @@ app.post('/addcar', passport.authenticate('jwt'), (req:any,res) => {
 	}
 
 	database.createCar(car,userID)
-	.then(value => {
-		console.log(value);
-		res.sendStatus(200);
-	})
-	.catch((error) =>{
-		console.log(error);
-		res.sendStatus(500);
-	})
+		.then(value => {
+			console.log(value);
+			res.sendStatus(200);
+		})
+		.catch((error) =>{
+			console.log(error);
+			res.sendStatus(500);
+		})
 });
 
 app.listen(PORT , () => {

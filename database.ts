@@ -1,15 +1,13 @@
 const db:Sequelize = require('./sequelize/index.js');
+const {onLoad} = require('./sequelize/index.js');
 
 import errors from './errors';
 
 import { Sequelize } from "sequelize/types";
 import IDatabase from "./types/dbinterface";
-import { create } from 'domain';
-import { json } from 'stream/consumers';
-import sequelize from 'sequelize';
-
 
 export default class Database implements IDatabase {
+
 	registerUser = async (email:string, firstName:string, hashedPass:string):Promise<any> => {
 		const foundUser = await db.models.user.findOne({
 			attributes: ['email'],
@@ -32,7 +30,6 @@ export default class Database implements IDatabase {
 				userID: user.getDataValue('id')
 			}
 		);
-		console.log(garage.getDataValue('id'));
 
 		user.setDataValue('garageID', garage.getDataValue('id'));
 		user.save();
@@ -41,10 +38,7 @@ export default class Database implements IDatabase {
 	}
 
 	getUser = (email:string,fields?:string[]):Promise<any> => {
-		// const attributes:string[] = fields || ['email', 'password']
-
 		return db.models.user.findOne({
-			// attributes: attributes,
 			where: {
 				email
 			}
@@ -52,12 +46,20 @@ export default class Database implements IDatabase {
 
 	}
 	getUserbyID = (id:string,fields?:string[]):Promise<any> => {
-		const attributes:string[] = fields || ['id', 'email', 'password']
+		const attributes = fields || null;
 
 		return db.models.user.findOne({
-			attributes: attributes,
+			attributes,
 			where: {
 				id
+			}
+		})
+	}
+
+	getUserbyFacebookID = (facebookID:string):Promise<any> => {
+		return db.models.user.findOne({
+			where: {
+				facebookID
 			}
 		})
 	}
@@ -87,7 +89,6 @@ export default class Database implements IDatabase {
 	}
 
 	getGaragebyID = (id):Promise<any> => {
-		// console.log(db.models.garage);
 		if(!id) {
 			throw new errors.missingargument();
 		}
@@ -100,7 +101,6 @@ export default class Database implements IDatabase {
 	}
 
 	createCar = async (car, userID):Promise<any> => {
-		// console.log(db.models.garage);
 		if(!car) {
 			throw new errors.missingargument();
 		}
@@ -129,5 +129,18 @@ export default class Database implements IDatabase {
 	getFile = (fileid):Promise<any> => {
 		return db.models.file.findByPk(fileid)
 
+	}
+
+	getAllImages = ():Promise<any> => {
+		return db.models.file.findAll({
+			where: {
+				ispicture: true
+			}
+		})
+
+	}
+
+	getAllFiles = ():Promise<any> => {
+		return db.models.file.findAll();
 	}
 }

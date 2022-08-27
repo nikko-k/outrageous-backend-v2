@@ -19,7 +19,7 @@ export default (sequelize:Sequelize) => {
             },
             model: {
                 allowNull:false,
-                type: DataTypes.DATE,
+                type: DataTypes.STRING,
             },
 			displacement: {
 				allowNull: true,
@@ -36,6 +36,10 @@ export default (sequelize:Sequelize) => {
 			mods: {
 				allowNull: true,
 				type: DataTypes.STRING,
+			},
+			apiID: {
+				allowNull: true,
+				type: DataTypes.STRING
 			}
         });
 

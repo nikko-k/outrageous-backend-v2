@@ -171,7 +171,9 @@ app.get( '/image/:size/:id', (req,res) => {
 			)
 			res.send();
 	}
-	const dir = sizes[size].dir || sizes['default'].dir;
+
+	const sizeObj = sizes[size] || sizes['default'];
+	const dir = sizeObj.dir;
 
 	db.getFile(id)
 	.then( value => {
